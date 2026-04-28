@@ -37,6 +37,16 @@ def main():
     st.title("❤️ noteスキ分析ツール")
     st.markdown("Gmailに届いたnoteのスキ通知を分析して、いつスキが押されたかを可視化します。")
 
+    # タブで使い方と分析を切り替え
+    if not st.session_state.authenticated:
+        tab1, tab2 = st.tabs(["🔐 認証・分析", "📖 使い方ガイド"])
+
+        with tab2:
+            show_usage_guide()
+
+        with tab1:
+            pass  # 認証セクションは下で表示
+
     # サイドバー
     with st.sidebar:
         st.header("設定")
@@ -75,6 +85,93 @@ def main():
         show_auth_section()
     else:
         show_analysis_section()
+
+
+def show_usage_guide():
+    """使い方ガイドを表示"""
+    st.header("📖 使い方ガイド")
+
+    st.markdown("""
+    このツールは、Gmailに届いたnoteのスキ通知メールを分析して、
+    **いつスキが押されたか**を可視化するWebアプリです。
+    """)
+
+    st.subheader("✨ 機能")
+    st.markdown("""
+    - 📧 Gmailからスキ通知メールを自動取得
+    - 📊 記事ごとのスキ数を集計
+    - ⏱️ 投稿後の時間分布を分析（24時間以内 / 1-3日後 / 3-7日後 / 1週間以降）
+    - 📈 スキの累積推移グラフ
+    - 🕐 時間帯別分布（何時にスキが押されやすいか）
+    """)
+
+    st.subheader("🔧 事前準備（初回のみ）")
+    st.markdown("""
+    このツールを使うには、Google Cloud Consoleで認証情報を作成する必要があります。
+    **約10分程度で完了します。**
+    """)
+
+    with st.expander("📝 ステップ1: Google Cloud プロジェクト作成", expanded=True):
+        st.markdown("""
+        1. [Google Cloud Console](https://console.cloud.google.com/) にアクセス
+        2. Googleアカウントでログイン
+        3. 画面上部の「プロジェクトを選択」→「新しいプロジェクト」をクリック
+        4. プロジェクト名を入力（例: `note-suki-analyzer`）して作成
+        """)
+
+    with st.expander("📝 ステップ2: Gmail APIを有効化"):
+        st.markdown("""
+        1. 左メニュー「APIとサービス」→「ライブラリ」
+        2. 検索欄に「Gmail API」と入力
+        3. Gmail APIをクリックし、「有効にする」ボタンを押す
+        """)
+
+    with st.expander("📝 ステップ3: OAuth同意画面を設定"):
+        st.markdown("""
+        1. 左メニュー「APIとサービス」→「OAuth同意画面」
+        2. User Type：「外部」を選択して「作成」
+        3. アプリ名を入力（例: `noteスキ分析`）
+        4. ユーザーサポートメール：自分のメールアドレス
+        5. デベロッパー連絡先：自分のメールアドレス
+        6. 「保存して次へ」を押していく
+        7. **テストユーザー**の画面で「ADD USERS」→ **自分のGmailアドレスを追加**
+        8. 「保存して次へ」で完了
+        """)
+
+    with st.expander("📝 ステップ4: 認証情報（credentials.json）を作成"):
+        st.markdown("""
+        1. 左メニュー「APIとサービス」→「認証情報」
+        2. 「＋認証情報を作成」→「OAuthクライアントID」
+        3. アプリケーションの種類：「**デスクトップアプリ**」を選択
+        4. 名前を入力して「作成」
+        5. 「**JSONをダウンロード**」をクリック
+        6. ダウンロードしたファイルが `credentials.json` です
+        """)
+
+    st.subheader("🚀 ツールの使い方")
+    st.markdown("""
+    1. 「認証・分析」タブに移動
+    2. ダウンロードした `credentials.json` をアップロード
+    3. 「認証URLを取得」をクリック
+    4. 表示されたURLにアクセスし、Googleアカウントで認証
+    5. 表示された認証コードをコピーしてツールに貼り付け
+    6. 「スキ通知メールを取得」で分析開始！
+    """)
+
+    st.subheader("🔒 セキュリティについて")
+    st.info("""
+    - アップロードしたcredentials.jsonはサーバーに保存されません
+    - セッション終了時（ブラウザを閉じた時）にすべてのデータが削除されます
+    - Gmail APIは**読み取り専用**アクセスのみ要求します
+    - メールの内容が外部に送信されることはありません
+    """)
+
+    st.subheader("💬 作者")
+    st.markdown("""
+    **SHO** | AI副業365日検証チャレンジ
+
+    noteで毎日AIを活用した副業検証の記録を投稿しています。
+    """)
 
 
 def show_auth_section():
